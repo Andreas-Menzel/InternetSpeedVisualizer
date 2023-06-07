@@ -33,6 +33,28 @@ def argparse_check_positive(value):
     return ivalue
 
 
+def argparse_check_pair_positive(value):
+    value_a = 0
+    value_b = 0
+
+    value_split = value.split(';')
+    if len(value_split) == 2:
+        value_a = value_split[0]
+        value_b = value_split[1]
+    else:
+        raise argparse.ArgumentTypeError(
+            "%s is an invalid positive int pair value" % value)
+
+    if value_a != '' and int(value_a) <= 0:
+        raise argparse.ArgumentTypeError(
+            "%s is an invalid positive int value" % value)
+    if value_b != '' and int(value_b) <= 0:
+        raise argparse.ArgumentTypeError(
+            "%s is an invalid positive int value" % value)
+
+    return f'{value_a};{value_b}'
+
+
 def setupArgumentParser():
     parser = argparse.ArgumentParser(
         prog='InternetSpeedVisualizer',
@@ -57,14 +79,16 @@ analyze your Internet speed data, collected using the InternetSpeedVisualizer.
                         help='Height in inch of the output image. (default: %(default)s)',
                         type=argparse_check_positive,
                         default=10)
-    parser.add_argument('-d', '--max_download',
-                        help='Maximum download speed promised by the ISP. (default: %(default)s)',
-                        type=argparse_check_positive,
-                        default=250)
-    parser.add_argument('-u', '--max_upload',
-                        help='Maximum upload speed promised by the ISP. (default: %(default)s)',
-                        type=argparse_check_positive,
-                        default=40)
+    parser.add_argument('-d', '--download',
+                        metavar='<min>;<max>',
+                        help='Download speed promised by the ISP. (default: "%(default)s")',
+                        type=argparse_check_pair_positive,
+                        default='180;250')
+    parser.add_argument('-u', '--upload',
+                        metavar='<min>;<max>',
+                        help='Upload speed promised by the ISP. (default: "%(default)s")',
+                        type=argparse_check_pair_positive,
+                        default='35;40')
     parser.add_argument('--interactive',
                         help='Show an interactive line-graph. (default: %(default)s)',
                         action='store_true')
@@ -76,6 +100,20 @@ analyze your Internet speed data, collected using the InternetSpeedVisualizer.
 
 def main():
     args = setupArgumentParser()
+
+    download_min = 0
+    download_max = 0
+    if args.download.split(';')[0] != '':
+        download_min = int(args.download.split(';')[0])
+    if args.download.split(';')[1] != '':
+        download_max = int(args.download.split(';')[1])
+
+    upload_min = 0
+    upload_max = 0
+    if args.upload.split(';')[0] != '':
+        upload_min = int(args.upload.split(';')[0])
+    if args.upload.split(';')[1] != '':
+        upload_max = int(args.upload.split(';')[1])
 
     if not Path(args.input).exists():
         raise FileNotFoundError(
@@ -142,21 +180,27 @@ Output-file: "{output_file.absolute()}"\
     for midnight in midnight_range:
         plt.axvline(midnight, color='gray', linestyle='-', linewidth=1)
 
-    # Add horizontal lines at 100 % and 90 % of args.max_download and args.max_upload
-    plt.axhline(args.max_download, color='green', linestyle='-', linewidth=3)
-    plt.axhline(0.9 * args.max_download, color='red',
-                linestyle='-', linewidth=2)
-    plt.axhline(args.max_upload, color='green', linestyle='-', linewidth=2)
-    plt.axhline(0.9 * args.max_upload, color='red',
-                linestyle='-', linewidth=1)
+    # Add horizontal lines at download_min, download_max, upload_min and upload_max
+    if download_max > 0:
+        plt.axhline(download_max, color='green', linestyle='-', linewidth=3)
+    if download_min > 0:
+        plt.axhline(download_min, color='red', linestyle='-', linewidth=2)
+    if upload_max > 0:
+        plt.axhline(upload_max, color='green', linestyle='-', linewidth=2)
+    if upload_min > 0:
+        plt.axhline(upload_min, color='red', linestyle='-', linewidth=1)
 
     # Add horizontal lines every 50 (Mbps)
-    y_ticks = [y for y in range(0, args.max_download + 1, 50) if y != args.max_download and y !=
-               0.9 * args.max_download and y != args.max_upload and y != 0.9*args.max_upload]
+    max_recorded_download = max(data['Download (Mbps)'])
+    max_recorded_upload = max(data['Upload (Mbps)'])
+    max_speed_in_graph = max(max_recorded_download, max_recorded_upload, download_max, upload_max)
+    y_ticks = [y for y in range(0, max_speed_in_graph, 50) if y != download_min
+               and y != download_max and y != upload_min and y != upload_max]
     for y in y_ticks:
         plt.axhline(y, color='gray', linestyle='dotted', linewidth=0.5)
 
     # Save the graph as an image
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     fig.set_size_inches(args.width, args.height)
     plt.savefig(output_file)
 
