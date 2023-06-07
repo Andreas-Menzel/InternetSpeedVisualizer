@@ -68,6 +68,9 @@ analyze your Internet speed data, collected using the InternetSpeedVisualizer.
     parser.add_argument('--interactive',
                         help='Show an interactive line-graph. (default: %(default)s)',
                         action='store_true')
+    parser.add_argument('-no', '--no_overwrite',
+                        help='Set this flag to automatically select a similar output-filename, so a potentially already existing file will not be overwritten.',
+                        action='store_true')
     return parser.parse_args()
 
 
@@ -90,17 +93,18 @@ def main():
             f'{Path(gettempdir(), "InternetSpeedVisualizer", datetimeString)}_internet_speeds.png')
 
     # Make sure that the output-file is unique and does not exist yet.
-    if output_file.exists():
-        output_file = Path(
-            output_file.parent, f'{output_file.stem}_{datetimeString}{output_file.suffix}')
-    if output_file.exists():
-        counter = 2
-        new_output_file = output_file
-        while new_output_file.exists():
-            new_output_file = Path(
-                csv_file.parent, f'{csv_file.stem}_{counter}{csv_file.suffix}')
-            counter = counter + 1
-        output_file = new_output_file
+    if args.no_overwrite or args.output == '':
+        if output_file.exists():
+            output_file = Path(
+                output_file.parent, f'{output_file.stem}_{datetimeString}{output_file.suffix}')
+        if output_file.exists():
+            counter = 2
+            new_output_file = output_file
+            while new_output_file.exists():
+                new_output_file = Path(
+                    csv_file.parent, f'{csv_file.stem}_{counter}{csv_file.suffix}')
+                counter = counter + 1
+            output_file = new_output_file
 
     print(f"""\
 InternetSpeedVisualizer (version {script_version})
