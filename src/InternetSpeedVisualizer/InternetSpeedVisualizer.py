@@ -22,7 +22,7 @@ from pathlib import Path
 from tempfile import gettempdir
 
 
-script_version = '1.0.0'
+script_version = '1.1.0'
 
 
 def argparse_check_positive(value):
