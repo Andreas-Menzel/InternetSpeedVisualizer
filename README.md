@@ -1,12 +1,12 @@
 # InternetSpeedVisualizer
 
-## 🚀 Powerful Python Tool for Analyzing Internet Connection Speed
+## Powerful Python Tool for Analyzing Internet Connection Speed
 
 InternetSpeedVisualizer is a tool designed to help you visualize and analyze
 your Internet speed data, which you can collect using the
 [InternetSpeedLogger](https://github.com/Andreas-Menzel/InternetSpeedLogger).
 
-## 📥 Installation
+## Installation
 
 Installation is as simple as running a pip command:
 
@@ -14,7 +14,7 @@ Installation is as simple as running a pip command:
 pip install InternetSpeedVisualizer
 ```
 
-## 🏁 Usage
+## Usage
 
 Once InternetSpeedVisualizer is installed using pip, you can easily execute the
 script from anywhere:
@@ -29,8 +29,8 @@ To access detailed execution information, simply type
 ```
 usage: InternetSpeedVisualizer [-h] [--version] -i INPUT [-o OUTPUT]
                                [--width WIDTH] [--height HEIGHT]
-                               [-d MAX_DOWNLOAD] [-u MAX_UPLOAD]
-                               [--interactive]
+                               [-d <min>;<max>] [-u <min>;<max>]
+                               [--interactive] [-no]
 
 InternetSpeedVisualizer is a powerful tool designed to help you visualize and
 analyze your Internet speed data, collected using the InternetSpeedVisualizer.
@@ -46,14 +46,49 @@ options:
                         Path to the line-graph-image that should be created.
   --width WIDTH         Width in inch of the output image. (default: 20)
   --height HEIGHT       Height in inch of the output image. (default: 10)
-  -d MAX_DOWNLOAD, --max_download MAX_DOWNLOAD
-                        Maximum download speed promised by the ISP. (default:
-                        250)
-  -u MAX_UPLOAD, --max_upload MAX_UPLOAD
-                        Maximum upload speed promised by the ISP. (default:
-                        40)
+  -d <min>;<max>, --download <min>;<max>
+                        Download speed promised by the ISP. (default:
+                        "180;250")
+  -u <min>;<max>, --upload <min>;<max>
+                        Upload speed promised by the ISP. (default: "35;40")
   --interactive         Show an interactive line-graph. (default: False)
+  -no, --no_overwrite   Set this flag to automatically select a similar
+                        output-filename, so a potentially already existing
+                        file will not be overwritten.
+
+Passing only minimum download speed:
+    --download "200;"
+Passing only maximum download speed:
+    --download ";250"
+Passing only minimum upload speed:
+    --upload "30;"
+Passing only maximum upload speed:
+    --upload ";40"
 ```
+
+## Sample output
+
+Given a sample .csv-file names `internet_speeds.csv`, the following command
+generates the following image:
+
+```
+InternetSpeedVisualizer -i internet_speeds.csv -o internet_speeds.png -d "180;250" -u "30;40"
+```
+
+![Internet Speed Visualizer Preview](images/internet_speeds.png)
+
+## Companion Tool: InternetSpeedLogger
+
+InternetSpeedVisualizer is designed to work in harmony with
+[InternetSpeedLogger](https://github.com/Andreas-Menzel/InternetSpeedLogger).
+This companion tool allows you to continuously log your internet speed at
+defined intervals.
+
+By saving the data in a CSV file,
+[InternetSpeedLogger](https://github.com/Andreas-Menzel/InternetSpeedLogger)
+provides you with a historical log of your internet speeds. This data can then
+be visualized using InternetSpeedVisualizer, enabling you to understand trends
+and fluctuations in your internet speed over time.
 
 ## 👏 Contribution
 
