@@ -62,6 +62,16 @@ def setupArgumentParser():
 InternetSpeedVisualizer is a powerful tool designed to help you visualize and
 analyze your Internet speed data, collected using the InternetSpeedVisualizer.
             """,
+        epilog="""
+Passing only minimum download speed:
+    --download \"200;\"
+Passing only maximum download speed:
+    --download \";250\"
+Passing only minimum upload speed:
+    --upload \"30;\"
+Passing only maximum upload speed:
+    --upload \";40\"
+        """,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--version', action='version',
                         version='%(prog)s ' + script_version)
